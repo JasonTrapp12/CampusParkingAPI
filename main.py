@@ -1,9 +1,18 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
 import json
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Review(BaseModel):
     id: Optional[int] = None
@@ -14,8 +23,6 @@ class Review(BaseModel):
 
 with open('reviews.json', 'r') as f:
     reviews =  json.load(f)
-    print("reviews:")
-    print(reviews)
     f.close()
 
 
@@ -29,7 +36,6 @@ def get_review(r_id: int):
 def get_lot_reviews(lot_name: str):
     lot_reviews = []
     for review in reviews:
-        print(review['lot'] + '\n' + lot_name)
         if review['lot'] == lot_name:
             lot_reviews.append(review)
     return lot_reviews
@@ -48,9 +54,7 @@ def post_review(new_review: Review):
         "time" : new_review.time,
         "rating" : new_review.rating
     }
-    print(review_to_add)
     reviews.append(review_to_add)
-    print(reviews)
 
     with open('reviews.json', 'w') as f:
         json.dump(reviews, f)
